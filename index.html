@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Drone Ranco</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Aplicaciones agrícolas con dron en la Región Metropolitana y O'Higgins. Drones DJI Agras T70P y T50, verificación con papel hidrosensible e informe técnico de cada aplicación.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,500&display=swap">
+<meta property="og:title" content="Drone Ranco · Aplicaciones agrícolas con dron">
+<meta property="og:description" content="Aplicaciones con drones DJI Agras en la Región Metropolitana y O'Higgins, con informe técnico de cada aplicación.">
+<meta property="og:image" content="https://droneranco.com/img/og.jpg">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/png" href="img/logo-color.png">
+<link rel="preload" as="image" href="img/hero.jpg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Drone Ranco","legalName":"Agrocomercial Ranco SpA","url":"https://droneranco.com","image":"https://droneranco.com/img/og.jpg","email":"contacto@droneranco.com","telephone":"+56947391615","areaServed":["Región Metropolitana","Región de O'Higgins"],"sameAs":["https://www.instagram.com/droneranco/"],"description":"Aplicaciones agrícolas con dron: aspersión de líquidos y aplicación de sólidos, con verificación de cobertura e informe técnico."}</script>
+<style>
+/* Manual de marca Agrodrone Ranco: verde 76C62B, celeste 40C1E4, gris 706D6E; tipografía Raleway
+   (la primaria, Rezland, no está en Google Fonts: se puede agregar con el archivo de la fuente).
+   Layout: bandas a todo el ancho; contenido en una columna de 1120px; héroe con foto real de aplicación; intro con el logo animado. */
+:root {
+  --bg: #ffffff;
+  --surface: #f6f5f5;
+  --ink: #2f2d2e;
+  --muted: #706d6e;
+  --line: #e3e1e1;
+  --green: #76c62b;
+  --green-strong: #76c62b;
+  --cyan: #40c1e4;
+  --cyan-soft: #40c1e4;
+  --band: #2f2d2e;
+  --band-ink: #ffffff;
+  --band-muted: #cfcccd;
+  --field-a: #6aa82a;
+  --field-b: #5f9a25;
+  --wa: #1f8f4e;
+  --display: "Raleway", "Segoe UI", system-ui, sans-serif;
+  --body: "Raleway", "Segoe UI", system-ui, sans-serif;
+  --mono: "Raleway", "Segoe UI", system-ui, sans-serif;
+  --wrap: 1120px;
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1d1c1c; --surface: #272526; --ink: #f2f1f1; --muted: #b8b5b6; --line: #383536;
+    --green: #76c62b; --green-strong: #76c62b; --cyan: #40c1e4; --cyan-soft: #40c1e4;
+    --band: #141313; --band-ink: #ffffff; --band-muted: #b8b5b6;
+    --field-a: #4c7d1f; --field-b: #44711b; --wa: #2aa862; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1d1c1c; --surface: #272526; --ink: #f2f1f1; --muted: #b8b5b6; --line: #383536;
+  --green: #76c62b; --green-strong: #76c62b; --cyan: #40c1e4; --cyan-soft: #40c1e4;
+  --band: #141313; --band-ink: #ffffff; --band-muted: #b8b5b6;
+  --field-a: #4c7d1f; --field-b: #44711b; --wa: #2aa862; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.6; font-variant-numeric: lining-nums; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--band); }
+a { color: inherit; }
+img { max-width: 100%; height: auto; }
+.wrap { max-width: var(--wrap); margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--display); line-height: 1.08; margin: 0; text-wrap: balance; letter-spacing: -0.015em; }
+h2 { font-size: clamp(30px, 4.2vw, 46px); font-weight: 800; }
+h3 { font-size: 22px; font-weight: 700; }
+p { margin: 0; }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); display: inline-flex; align-items: center; gap: 10px; }
+.eyebrow::before { content: ""; width: 22px; height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--green), var(--cyan)); }
+.lead { color: var(--muted); max-width: 60ch; font-size: 18px; }
+:focus-visible { outline: 3px solid var(--cyan-soft); outline-offset: 3px; border-radius: 6px; }
+
+/* Botones */
+.btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px; border-radius: 999px; font-weight: 700; font-size: 16px; text-decoration: none; border: 0; cursor: pointer; font-family: var(--body); transition: transform .15s ease, box-shadow .15s ease; }
+.btn:hover { transform: translateY(-1px); }
+.btn-wa { background: var(--wa); color: #fff; box-shadow: 0 6px 18px rgba(16, 80, 40, .25); }
+.btn-ghost { background: transparent; color: var(--band-ink); border: 1.5px solid rgba(238, 244, 236, .45); }
+.btn-dark { background: var(--ink); color: var(--bg); }
+.btn svg { width: 20px; height: 20px; flex: none; }
+
+/* Encabezado */
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--band) 92%, transparent); backdrop-filter: blur(8px); color: var(--band-ink); }
+header.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 12px; }
+header.top img { height: 40px; width: auto; display: block; }
+header.top nav { display: flex; gap: 22px; align-items: center; font-weight: 600; font-size: 15px; }
+header.top nav a { text-decoration: none; color: var(--band-muted); }
+header.top nav a:hover { color: var(--band-ink); }
+header.top .btn { padding: 10px 16px; font-size: 14.5px; }
+@media (max-width: 860px) { header.top nav a.nav-link { display: none; } }
+
+/* Intro: logo animado una vez por visita */
+.intro { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: grid; place-items: center; transition: opacity .6s ease, visibility .6s ease; cursor: pointer; }
+.intro img { width: min(80vw, 560px); height: auto; display: block; }
+.intro.fuera { opacity: 0; visibility: hidden; }
+
+/* Héroe */
+.hero { position: relative; background: var(--band); color: var(--band-ink); overflow: hidden; }
+.hero .foto { position: absolute; top: 0; bottom: 0; left: 40%; width: 60%; height: 100%; object-fit: cover; object-position: 12% 45%; display: block; animation: acercar 14s ease-out both; }
+@keyframes acercar { from { transform: scale(1.07); } to { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .hero .foto { animation: none; } }
+.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--band) 0%, var(--band) 40%, color-mix(in srgb, var(--band) 72%, transparent) 45%, color-mix(in srgb, var(--band) 30%, transparent) 52%, transparent 62%); pointer-events: none; }
+.hero .wrap { position: relative; z-index: 1; padding-block: clamp(64px, 11vw, 132px) clamp(56px, 8vw, 96px); display: grid; gap: 26px; }
+@media (max-width: 860px) {
+  .hero .foto { position: relative; left: 0; width: 100%; height: 62vw; object-position: 40% 45%; }
+  .hero::after { inset: 0 0 auto; height: 62vw; background: linear-gradient(180deg, transparent 50%, var(--band) 100%); }
+  .hero .wrap { padding-block: 8px 56px; }
+}
+.hero h1 { font-size: clamp(40px, 6.6vw, 76px); font-weight: 900; max-width: 14ch; }
+.hero h1 em { font-style: normal; background: linear-gradient(90deg, var(--green-strong), var(--cyan-soft)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero p.lead { color: var(--band-muted); font-size: clamp(17px, 1.6vw, 20px); }
+.hero .ctas { display: flex; flex-wrap: wrap; gap: 12px; }
+.hero .eyebrow { color: var(--band-muted); }
+
+/* Franja de cifras */
+.stats { background: linear-gradient(90deg, #76c62b, #40c1e4); color: #2f2d2e; }
+.stats .wrap { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; padding-block: 26px; }
+.stat b { display: block; font-family: var(--display); font-size: clamp(26px, 3vw, 36px); font-weight: 900; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 14.5px; font-weight: 600; }
+@media (max-width: 760px) { .stats .wrap { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+section.block { padding-block: clamp(64px, 9vw, 112px); }
+.head { display: grid; gap: 14px; margin-bottom: 40px; }
+
+/* Servicios */
+.servicios { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.servicio { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; display: grid; align-content: start; }
+.servicio > img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; }
+.servicio .txt { padding: 0 28px 28px; display: grid; gap: 14px; }
+.servicio .ico { width: 56px; height: 56px; margin-top: -28px; border-radius: 14px; border: 4px solid var(--surface); background: linear-gradient(135deg, var(--green), var(--cyan)); display: grid; place-items: center; color: #ffffff; position: relative; }
+.servicio p { color: var(--muted); }
+.servicio ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
+.servicio li { font-size: 13.5px; font-weight: 600; padding: 5px 11px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); color: var(--muted); }
+@media (max-width: 760px) { .servicios { grid-template-columns: 1fr; } }
+
+/* Proceso */
+.proceso-grid { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 48px; align-items: center; }
+.proceso-grid > img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--radius); display: block; }
+.proceso { display: grid; gap: 0; border-top: 2px solid var(--ink); }
+.paso { display: grid; grid-template-columns: 150px 1fr; gap: 6px 22px; padding: 20px 0; border-bottom: 1px solid var(--line); }
+.paso .n { font-size: 13px; font-weight: 800; color: var(--muted); letter-spacing: .1em; padding-top: 4px; grid-row: span 2; }
+.paso .n b { display: block; font-size: 30px; line-height: 1; color: var(--green); font-weight: 900; margin-bottom: 4px; }
+.paso p { color: var(--muted); font-size: 15.5px; }
+@media (max-width: 860px) {
+  .proceso-grid { grid-template-columns: 1fr; gap: 28px; }
+  .proceso-grid > img { aspect-ratio: 3 / 2; }
+}
+@media (max-width: 520px) { .paso { grid-template-columns: 1fr; } .paso .n { grid-row: auto; } .paso .n b { display: inline; font-size: 13px; margin-right: 8px; } }
+
+
+/* Banda de foto a contraluz */
+.contraluz { position: relative; margin: 0; height: clamp(340px, 44vw, 580px); overflow: hidden; background: var(--band); }
+.contraluz img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 42%; display: block; }
+.contraluz::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(20, 19, 19, .78) 0%, rgba(20, 19, 19, .25) 38%, transparent 60%); }
+.contraluz figcaption { position: absolute; inset: auto 0 0; z-index: 1; color: #ffffff; }
+.contraluz figcaption .wrap { padding-block: 0 clamp(24px, 4vw, 44px); }
+.contraluz figcaption p { font-family: var(--display); font-weight: 800; font-size: clamp(24px, 3.4vw, 40px); line-height: 1.12; max-width: 20ch; text-wrap: balance; }
+.contraluz figcaption a { display: inline-block; margin-top: 10px; font-weight: 700; font-size: 15px; color: #ffffff; }
+
+/* Informe de muestra */
+.informe-band { background: var(--band); color: var(--band-ink); }
+.informe-band .lead { color: var(--band-muted); }
+.informe-band .eyebrow { color: var(--band-muted); }
+.informe-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 48px; align-items: center; }
+.informe-grid ul { margin: 26px 0 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+.informe-grid li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; color: var(--band-ink); }
+.informe-grid li svg { color: var(--green-strong); margin-top: 3px; }
+.hoja { background: #ffffff; color: #2f2d2e; border-radius: 10px; padding: 0 0 18px; box-shadow: 0 24px 60px rgba(0, 0, 0, .35); overflow: hidden; transform: rotate(-1.2deg); }
+.hoja .franja { height: 54px; background: linear-gradient(90deg, #76c62b, #40c1e4); display: flex; align-items: center; padding: 0 18px; }
+.hoja .franja img { height: 32px; width: auto; }
+.hoja .cuerpo { padding: 16px 18px 0; display: grid; gap: 14px; }
+.hoja .tit { font-family: var(--display); font-weight: 800; font-size: 15px; letter-spacing: .02em; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.hoja .tit span { font-weight: 600; font-size: 12px; color: #706d6e; }
+.hoja .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.hoja .kpi { border-top: 2px solid #76c62b; padding-top: 6px; }
+.hoja .kpi:nth-child(even) { border-top-color: #40c1e4; }
+.hoja .kpi b { display: block; font-family: var(--display); font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.hoja .kpi small { font-size: 10.5px; color: #706d6e; line-height: 1.2; display: block; }
+.hoja .sub { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #fff; background: #706d6e; padding: 4px 8px; border-radius: 3px; }
+.hoja svg.hist { width: 100%; height: auto; display: block; }
+.hoja .nota { font-size: 10.5px; color: #706d6e; font-style: italic; }
+@media (max-width: 860px) { .informe-grid { grid-template-columns: 1fr; } .hoja { transform: none; } }
+
+/* Equipos */
+.equipos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.equipo { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); overflow: hidden; display: grid; }
+.equipo-foto { margin: 0 0 22px; border-radius: var(--radius); overflow: hidden; }
+.equipo-foto img { width: 100%; aspect-ratio: 21 / 9; object-fit: cover; object-position: 50% 60%; display: block; }
+@media (max-width: 760px) { .equipo-foto img { aspect-ratio: 4 / 3; } }
+.equipo .info { padding: 24px 26px 26px; display: grid; gap: 12px; }
+.equipo p { color: var(--muted); font-size: 15.5px; }
+.specs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.specs div { padding: 10px 12px; }
+.specs div + div { border-left: 1px solid var(--line); }
+.specs b { display: block; font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.specs small { font-size: 12px; color: var(--muted); }
+@media (max-width: 760px) { .equipos { grid-template-columns: 1fr; } }
+
+/* Clientes y zona */
+.confian { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.clientes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--line); }
+.clientes div { padding: 18px 4px; border-bottom: 1px solid var(--line); font-family: var(--display); font-weight: 700; font-size: 19px; }
+.clientes div:nth-child(odd) { padding-right: 16px; }
+.zona { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; display: grid; }
+.zona > img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; }
+.zona .txt { padding: 22px 26px 26px; display: grid; gap: 14px; }
+.zona .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.zona .tags span { font-size: 14px; font-weight: 600; padding: 6px 12px; border-radius: 999px; background: color-mix(in srgb, var(--cyan) 18%, transparent); }
+@media (max-width: 860px) { .confian { grid-template-columns: 1fr; } }
+
+/* Cotizar */
+.cotizar { background: linear-gradient(135deg, color-mix(in srgb, var(--green-strong) 16%, var(--bg)), color-mix(in srgb, var(--cyan-soft) 16%, var(--bg))); }
+.cot-grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 48px; align-items: start; }
+.contacto-lista { display: grid; gap: 14px; margin-top: 26px; }
+.contacto-lista div { display: grid; gap: 2px; }
+.contacto-lista small { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.contacto-lista b { font-size: 19px; user-select: all; }
+.cot-foto { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius); display: block; margin-top: 30px; }
+form.cot { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+form.cot .full { grid-column: 1 / -1; }
+form.cot label { display: grid; gap: 6px; font-weight: 600; font-size: 14.5px; }
+form.cot input, form.cot select, form.cot textarea { font: inherit; font-size: 16px; padding: 11px 12px; border-radius: 9px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); width: 100%; min-width: 0; }
+form.cot textarea { min-height: 84px; resize: vertical; }
+form.cot .ayuda { font-size: 13.5px; color: var(--muted); }
+form.cot .error { color: #c0392b; font-size: 14px; font-weight: 600; }
+@media (max-width: 860px) { .cot-grid { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { form.cot { grid-template-columns: 1fr; padding: 20px; } }
+
+footer { background: var(--band); color: var(--band-muted); font-size: 15px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 24px; justify-content: space-between; align-items: center; padding-block: 34px; }
+footer img { height: 36px; width: auto; display: block; }
+footer a { color: var(--band-ink); }
+
+/* Botón flotante de WhatsApp */
+.wa-float { position: fixed; right: calc(18px + env(safe-area-inset-right, 0px)); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 30; width: 58px; height: 58px; border-radius: 50%; background: var(--wa); color: #fff; display: grid; place-items: center; box-shadow: 0 8px 24px rgba(0, 0, 0, .28); }
+.wa-float svg { width: 30px; height: 30px; }
+</style>
+</head>
+<body>
+
+
+<div class="intro" id="intro" hidden aria-hidden="true"><img src="img/logo-animado.webp" alt=""></div>
+
+<header class="top">
+  <div class="wrap">
+    <a href="#inicio" aria-label="Drone Ranco, inicio"><img src="img/logo-blanco.png" alt="Agrodrone Ranco"></a>
+    <nav aria-label="Secciones">
+      <a class="nav-link" href="#servicios">Servicios</a>
+      <a class="nav-link" href="#como-trabajamos">Cómo trabajamos</a>
+      <a class="nav-link" href="#informe">Informe</a>
+      <a class="nav-link" href="#equipos">Equipos</a>
+      <a class="btn btn-wa" href="#cotizar">Cotizar</a>
+    </nav>
+  </div>
+</header>
+
+<main id="inicio">
+  <section class="hero" aria-labelledby="hero-titulo">
+    <img class="foto" src="img/hero.jpg" width="1600" height="1025" alt="Dron Agras aplicando sobre un cultivo de maravilla" fetchpriority="high">
+    <div class="wrap">
+      <p class="eyebrow">Región Metropolitana · O'Higgins</p>
+      <h1 id="hero-titulo">Aplicaciones agrícolas con dron, <em>con informe de cada hectárea</em></h1>
+      <p class="lead">Aplicamos fitosanitarios, fertilizantes y semillas con drones DJI Agras. Verificamos la cobertura con papel hidrosensible y te entregamos un informe técnico de cada aplicación.</p>
+      <div class="ctas">
+        <a class="btn btn-wa" id="wa-hero" href="https://wa.me/56947391615" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.4a.5.5 0 0 0 0-.4l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.5-.3Z"/></svg>
+          Cotizar por WhatsApp
+        </a>
+        <a class="btn btn-ghost" href="#servicios">Ver servicios</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats" aria-label="Drone Ranco en cifras">
+    <div class="wrap">
+      <div class="stat"><b>+15.000 há</b><span>aplicadas desde 2021</span></div>
+      <div class="stat"><b>70 L</b><span>de tanque en el Agras T70P</span></div>
+      <div class="stat"><b>11 m</b><span>de ancho de trabajo por pasada</span></div>
+      <div class="stat"><b>1 informe</b><span>por cada aplicación</span></div>
+    </div>
+  </section>
+
+  <section class="block" id="servicios" aria-labelledby="servicios-titulo">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Servicios</p>
+        <h2 id="servicios-titulo">Aplicamos lo que tu cultivo necesita, sin pisar el suelo</h2>
+        <p class="lead">El flujo de aire del dron empuja el producto dentro del follaje. Usas menos agua, no compactas el suelo y entras al potrero aunque esté húmedo.</p>
+      </div>
+      <div class="servicios">
+        <article class="servicio">
+          <img src="img/liquidos.jpg" width="1000" height="625" loading="lazy" alt="Operador con traje de protección vertiendo producto líquido en el estanque del dron">
+          <div class="txt">
+          <div class="ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 3c3 4 5 6.6 5 9.3A5 5 0 0 1 7 12.3C7 9.6 9 7 12 3Z"/><path d="M5 20h14"/></svg></div>
+          <h3>Aspersión de líquidos</h3>
+          <p>Fungicidas, insecticidas, herbicidas, fertilizantes foliares y bioestimulantes, con cobertura uniforme y penetración en la canopia.</p>
+          <ul aria-label="Cultivos"><li>Frutales</li><li>Cereales</li><li>Hortalizas</li><li>Semilleros</li></ul>
+          </div>
+        </article>
+        <article class="servicio">
+          <img src="img/solidos.jpg" width="1000" height="625" loading="lazy" alt="Dron visto desde abajo esparciendo producto granulado contra el cielo azul">
+          <div class="txt">
+          <div class="ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="8" r="1.6"/><circle cx="13" cy="6" r="1.6"/><circle cx="17" cy="11" r="1.6"/><circle cx="10" cy="13" r="1.6"/><circle cx="15" cy="17" r="1.6"/><path d="M4 21h16"/></svg></div>
+          <h3>Aplicación de sólidos</h3>
+          <p>Fertilizantes granulados, mezclas nutricionales y semillas, con dosis controlada por hectárea y sin dañar el cultivo establecido.</p>
+          <ul aria-label="Cultivos"><li>Frutales</li><li>Cereales</li><li>Praderas</li><li>Semilleros</li></ul>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="como-trabajamos" aria-labelledby="proceso-titulo" style="padding-top: 0">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Cómo trabajamos</p>
+        <h2 id="proceso-titulo">De la visita al informe, en cuatro pasos</h2>
+      </div>
+      <div class="proceso-grid">
+        <img src="img/proceso.jpg" width="720" height="900" loading="lazy" alt="Revisión de la aplicación en la tableta junto al cliente, en el potrero">
+        <div class="proceso">
+        <div class="paso"><span class="n"><b>01</b>PLANIFICACIÓN</span><h3>Revisamos el campo</h3><p>Definimos producto, dosis, mojamiento y horario según el cultivo y el clima.</p></div>
+        <div class="paso"><span class="n"><b>02</b>APLICACIÓN</span><h3>Volamos el cuartel</h3><p>Ruta programada en el control del Agras, con registro de vuelos y tiempos.</p></div>
+        <div class="paso"><span class="n"><b>03</b>VERIFICACIÓN</span><h3>Medimos la cobertura</h3><p>Papel hidrosensible en el follaje: impactos por cm² y tamaño de gota.</p></div>
+        <div class="paso"><span class="n"><b>04</b>INFORME</span><h3>Te enviamos el PDF</h3><p>Productos, dosis, condiciones, cuarteles y análisis de gotas, el mismo día.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <figure class="contraluz">
+    <img src="img/contraluz.jpg" width="1600" height="1118" loading="lazy" alt="Dron aplicando a contraluz sobre un cultivo de maravilla, con árboles y cerros al fondo">
+    <figcaption><div class="wrap"><p>Cada gota cuenta, y la medimos</p><a href="#informe">Mira cómo es el informe ↓</a></div></figcaption>
+  </figure>
+
+  <section class="block informe-band" id="informe" aria-labelledby="informe-titulo">
+    <div class="wrap informe-grid">
+      <div>
+        <p class="eyebrow">Respaldo técnico</p>
+        <h2 id="informe-titulo">Cada aplicación queda documentada</h2>
+        <p class="lead" style="margin-top: 16px">Recibes un informe con tu marca de campo: qué se aplicó, cuánto, cuándo y con qué cobertura. Sirve para tu registro, para auditorías y para comparar temporadas.</p>
+        <ul>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg>Superficie, agua total, mojamiento y ritmo de trabajo</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg>Productos, dosis por hectárea y totales usados</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg>Hora de inicio y término, temperatura y viento</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg>Detalle por cuartel y pantallazo del área aplicada</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg>Análisis de papel hidrosensible: impactos por cm², DV0.1, DV0.5 y DV0.9</li>
+        </ul>
+      </div>
+      <figure class="hoja" style="margin: 0" aria-label="Ejemplo de informe de aplicación">
+        <div class="franja"><img src="img/logo-blanco.png" alt=""></div>
+        <div class="cuerpo">
+          <div class="tit">INFORME DE APLICACIÓN CON DRON <span>N° 2026-001 · ejemplo</span></div>
+          <div class="kpis">
+            <div class="kpi"><b>12,4</b><small>Superficie (há)</small></div>
+            <div class="kpi"><b>992</b><small>Agua total (L)</small></div>
+            <div class="kpi"><b>80</b><small>Mojamiento (L/há)</small></div>
+            <div class="kpi"><b>5,0</b><small>Ritmo (há/h)</small></div>
+          </div>
+          <div class="sub">Análisis con papel hidrosensible</div>
+          <div class="kpis">
+            <div class="kpi"><b>51</b><small>Impactos (gotas/cm²)</small></div>
+            <div class="kpi"><b>131</b><small>DV0.1 (µm)</small></div>
+            <div class="kpi"><b>307</b><small>DV0.5 (µm)</small></div>
+            <div class="kpi"><b>615</b><small>DV0.9 (µm)</small></div>
+          </div>
+          <svg class="hist" id="hist" viewBox="0 0 360 120" role="img" aria-label="Histograma de tamaño de gotas, de menos de 50 a más de 900 micrones"></svg>
+          <p class="nota">Datos de ejemplo. Cada informe se genera con los datos reales de la aplicación.</p>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <section class="block" id="equipos" aria-labelledby="equipos-titulo">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Equipos</p>
+        <h2 id="equipos-titulo">Dos drones DJI Agras para cada tamaño de trabajo</h2>
+      </div>
+      <figure class="equipo-foto"><img src="img/equipo.jpg" width="1600" height="686" loading="lazy" alt="Dron Agras con sus brazos desplegados sobre una pradera"></figure>
+      <div class="equipos">
+        <article class="equipo">
+          <div class="info">
+            <h3>DJI Agras T70P</h3>
+            <p>Máxima capacidad para grandes superficies y follajes densos. Radar y visión omnidireccional para esquivar obstáculos.</p>
+            <div class="specs"><div><b>70 L</b><small>tanque</small></div><div><b>40 L/min</b><small>flujo máx.</small></div><div><b>11 m</b><small>ancho de trabajo</small></div></div>
+          </div>
+        </article>
+        <article class="equipo">
+          <div class="info">
+            <h3>DJI Agras T50</h3>
+            <p>Versátil para frutales, semilleros y cuarteles irregulares. Radar en fase activa y seguimiento preciso del terreno.</p>
+            <div class="specs"><div><b>40 L</b><small>tanque</small></div><div><b>16 L/min</b><small>flujo (2 boquillas)</small></div><div><b>11 m</b><small>ancho de trabajo</small></div></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="clientes-titulo" style="padding-top: 0">
+    <div class="wrap confian">
+      <div>
+        <div class="head" style="margin-bottom: 24px">
+          <p class="eyebrow">Confían en nosotros</p>
+          <h2 id="clientes-titulo">Del pequeño agricultor a la gran empresa</h2>
+        </div>
+        <div class="clientes">
+          <div>Corteva</div><div>Agrícola Vista Hermosa</div><div>Fundo San Telmo</div><div>Semillas Tuniche</div>
+        </div>
+      </div>
+      <aside class="zona" aria-labelledby="zona-titulo">
+        <img src="img/zona.jpg" width="1000" height="563" loading="lazy" alt="Operador con traje de protección preparando la mezcla junto a la camioneta, temprano en la mañana">
+        <div class="txt">
+        <h3 id="zona-titulo">Zona de servicio</h3>
+        <p class="lead" style="font-size: 16px">Trabajamos en la Región Metropolitana y en la Región de O'Higgins. Si tu campo está fuera de esta zona, escríbenos igual y lo evaluamos.</p>
+        <div class="tags"><span>Región Metropolitana</span><span>O'Higgins</span><span>Otras zonas a convenir</span></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="block cotizar" id="cotizar" aria-labelledby="cotizar-titulo">
+    <div class="wrap cot-grid">
+      <div>
+        <p class="eyebrow">Cotizar</p>
+        <h2 id="cotizar-titulo">Cuéntanos de tu campo</h2>
+        <p class="lead" style="margin-top: 16px">Completa los datos y se abrirá WhatsApp con el mensaje listo para enviar. Te respondemos con una propuesta.</p>
+        <div class="contacto-lista">
+          <div><small>WhatsApp</small><b>+56 9 4739 1615</b></div>
+          <div><small>Correo</small><b>contacto@droneranco.com</b></div>
+          <div><small>Instagram</small><b><a href="https://www.instagram.com/droneranco/" target="_blank" rel="noopener">@droneranco</a></b></div>
+        </div>
+        <img class="cot-foto" src="img/conversacion.jpg" width="1000" height="750" loading="lazy" alt="Conversación con un agricultor en su potrero">
+      </div>
+      <form class="cot" id="form-cot" novalidate>
+        <label>Nombre<input id="f-nombre" name="nombre" autocomplete="name" value="Juan Pérez"></label>
+        <label>Campo o empresa<input id="f-campo" name="campo" value="Fundo El Roble"></label>
+        <label>Comuna<input id="f-comuna" name="comuna" value="Paine"></label>
+        <label>Cultivo<input id="f-cultivo" name="cultivo" value="Nogales"></label>
+        <label>Superficie (há)<input id="f-ha" name="ha" inputmode="decimal" value="12"></label>
+        <label>Servicio
+          <select id="f-servicio" name="servicio">
+            <option>Aspersión de líquidos</option>
+            <option>Aplicación de sólidos</option>
+            <option>No estoy seguro</option>
+          </select>
+        </label>
+        <label class="full">Fecha estimada<input id="f-fecha" name="fecha" value="Primera semana de noviembre"></label>
+        <label class="full">Comentarios<textarea id="f-coment" name="comentarios">Control de peste negra, aplicación de fungicida.</textarea></label>
+        <p class="ayuda full">El formulario viene con un ejemplo: reemplázalo por tus datos.</p>
+        <p class="error full" id="f-error" hidden></p>
+        <div class="full"><button class="btn btn-wa" type="submit">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Z"/></svg>
+          Enviar por WhatsApp</button></div>
+        <p class="ayuda full" id="f-enlace" hidden></p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <img src="img/logo-blanco.png" alt="Agrodrone Ranco">
+    <p>Agrocomercial Ranco SpA · Aplicaciones agrícolas con dron desde 2021</p>
+    <p><a href="https://www.instagram.com/droneranco/" target="_blank" rel="noopener">Instagram</a> · contacto@droneranco.com</p>
+  </div>
+</footer>
+
+<a class="wa-float" href="https://wa.me/56947391615" target="_blank" rel="noopener" aria-label="Escribir por WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.4a.5.5 0 0 0 0-.4l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.5-.3Z"/></svg>
+</a>
+
+<script>
+(function () {
+  var TEL = '56947391615';
+  var wa = function (texto) { return 'https://wa.me/' + TEL + '?text=' + encodeURIComponent(texto); };
+  document.querySelectorAll('a[href^="https://wa.me/"]').forEach(function (a) {
+    a.href = wa('Hola Drone Ranco, quiero cotizar una aplicación con dron.');
+  });
+
+  // Formulario de cotización: arma el mensaje y abre WhatsApp
+  var form = document.getElementById('form-cot');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = function (id) { return document.getElementById(id).value.trim(); };
+    var err = document.getElementById('f-error');
+    if (!v('f-nombre') || !v('f-cultivo') || !v('f-ha')) {
+      err.textContent = 'Completa al menos tu nombre, el cultivo y la superficie.';
+      err.hidden = false;
+      return;
+    }
+    err.hidden = true;
+    var msg = 'Hola Drone Ranco, quiero cotizar una aplicación con dron.\n' +
+      'Nombre: ' + v('f-nombre') + '\nCampo: ' + v('f-campo') + '\nComuna: ' + v('f-comuna') +
+      '\nCultivo: ' + v('f-cultivo') + '\nSuperficie: ' + v('f-ha') + ' há\nServicio: ' + v('f-servicio') +
+      '\nFecha estimada: ' + v('f-fecha') + (v('f-coment') ? '\nComentarios: ' + v('f-coment') : '');
+    var url = wa(msg);
+    var aviso = document.getElementById('f-enlace');
+    aviso.innerHTML = '';
+    var a = document.createElement('a');
+    a.href = url; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = 'Si WhatsApp no se abrió, toca aquí para enviar el mensaje.';
+    aviso.appendChild(a);
+    aviso.hidden = false;
+    a.click();
+  });
+
+  // Histograma de ejemplo (impactos por rango de tamaño, µm)
+  var barras = [0, 0, 32, 26, 29, 30, 25, 35, 16, 13, 12, 7, 10, 8, 4, 4, 2, 1];
+  var svg = document.getElementById('hist');
+  var NS = 'http://www.w3.org/2000/svg';
+  var W = 360, H = 120, base = 100, top = 8, max = 35, bw = (W - 20) / barras.length;
+  var mk = function (tag, attrs) { var el = document.createElementNS(NS, tag); for (var k in attrs) el.setAttribute(k, attrs[k]); return el; };
+  svg.appendChild(mk('line', { x1: 10, x2: W - 10, y1: base, y2: base, stroke: '#bdbabb', 'stroke-width': 1 }));
+  barras.forEach(function (b, i) {
+    var h = (b / max) * (base - top);
+    svg.appendChild(mk('rect', { x: 10 + i * bw + 1.5, y: base - h, width: bw - 3, height: h, fill: '#40c1e4', rx: 1.5 }));
+  });
+  [['<50', 0], ['300', 6], ['600', 12], ['>900', 17]].forEach(function (t) {
+    var tx = mk('text', { x: 10 + t[1] * bw + bw / 2, y: 114, 'text-anchor': 'middle', 'font-size': 9, fill: '#706d6e', 'font-family': 'Raleway, sans-serif' });
+    tx.textContent = t[0]; svg.appendChild(tx);
+  });
+
+  // Intro: el logo animado se muestra una vez por visita
+  var intro = document.getElementById('intro');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var visto = false;
+  try { visto = sessionStorage.getItem('dr-intro') === '1'; sessionStorage.setItem('dr-intro', '1'); } catch (e) {}
+  if (!reduce && !visto) {
+    var cerrar = function () { intro.classList.add('fuera'); setTimeout(function () { intro.remove(); }, 700); };
+    intro.hidden = false;
+    intro.addEventListener('click', cerrar);
+    var img = intro.querySelector('img');
+    var esperar = function () { setTimeout(cerrar, 2900); };
+    if (img.complete) esperar(); else { img.addEventListener('load', esperar); img.addEventListener('error', cerrar); }
+    setTimeout(cerrar, 5000);
+  } else {
+    intro.remove();
+  }
+})();
+</script>
+
+</body>
+</html>
