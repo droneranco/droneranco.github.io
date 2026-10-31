@@ -99,14 +99,16 @@ header.top .btn { padding: 10px 16px; font-size: 14.5px; }
 
 /* Héroe */
 .hero { position: relative; background: var(--band); color: var(--band-ink); overflow: hidden; }
-.hero .foto { position: absolute; top: 0; bottom: 0; left: 40%; width: 60%; height: 100%; object-fit: cover; object-position: 12% 45%; display: block; animation: acercar 14s ease-out both; }
+.hero .media { position: absolute; top: 0; bottom: 0; left: 40%; right: 0; overflow: hidden; }
+.hero .media img { width: 100%; height: 100%; object-fit: cover; object-position: 12% 45%; display: block; animation: acercar 14s ease-out both; }
+.hero .media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--band) 0%, color-mix(in srgb, var(--band) 85%, transparent) 12%, color-mix(in srgb, var(--band) 55%, transparent) 26%, color-mix(in srgb, var(--band) 20%, transparent) 42%, transparent 60%); pointer-events: none; }
 @keyframes acercar { from { transform: scale(1.07); } to { transform: scale(1); } }
-@media (prefers-reduced-motion: reduce) { .hero .foto { animation: none; } }
-.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--band) 0%, var(--band) 40%, color-mix(in srgb, var(--band) 72%, transparent) 45%, color-mix(in srgb, var(--band) 30%, transparent) 52%, transparent 62%); pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .hero .media img { animation: none; } }
 .hero .wrap { position: relative; z-index: 1; padding-block: clamp(64px, 11vw, 132px) clamp(56px, 8vw, 96px); display: grid; gap: 26px; }
 @media (max-width: 860px) {
-  .hero .foto { position: relative; left: 0; width: 100%; height: 62vw; object-position: 40% 45%; }
-  .hero::after { inset: 0 0 auto; height: 62vw; background: linear-gradient(180deg, transparent 50%, var(--band) 100%); }
+  .hero .media { position: relative; left: 0; height: 62vw; }
+  .hero .media img { object-position: 40% 45%; }
+  .hero .media::after { background: linear-gradient(180deg, transparent 50%, var(--band) 100%); }
   .hero .wrap { padding-block: 8px 56px; }
 }
 .hero h1 { font-size: clamp(40px, 6.6vw, 76px); font-weight: 900; max-width: 14ch; }
@@ -211,6 +213,22 @@ section.block { padding-block: clamp(64px, 9vw, 112px); }
 .zona .tags span { font-size: 14px; font-weight: 600; padding: 6px 12px; border-radius: 999px; background: color-mix(in srgb, var(--cyan) 18%, transparent); }
 @media (max-width: 860px) { .confian { grid-template-columns: 1fr; } }
 
+/* Instagram */
+.ig-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 32px; }
+.ig-head .btn { background: var(--ink); color: var(--bg); }
+.ig-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; align-items: start; }
+.ig-grid > * { min-width: 0; }
+.ig-grid blockquote.instagram-media, .ig-grid iframe.instagram-media { margin: 0 !important; min-width: 0 !important; width: 100% !important; max-width: 100% !important; }
+.ig-card { display: grid; gap: 12px; padding: 22px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); text-decoration: none; color: var(--ink); min-height: 220px; align-content: start; }
+.ig-card .quien { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; }
+.ig-card .quien i { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--green), var(--cyan)); flex: none; }
+.ig-card p { color: var(--muted); font-size: 15px; }
+.ig-card .ver { font-weight: 700; font-size: 14.5px; color: var(--ink); }
+@media (max-width: 860px) {
+  .ig-grid { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: min(86%, 360px); overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; }
+  .ig-grid > * { scroll-snap-align: start; }
+}
+
 /* Cotizar */
 .cotizar { background: linear-gradient(135deg, color-mix(in srgb, var(--green-strong) 16%, var(--bg)), color-mix(in srgb, var(--cyan-soft) 16%, var(--bg))); }
 .cot-grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 48px; align-items: start; }
@@ -259,7 +277,7 @@ footer a { color: var(--band-ink); }
 
 <main id="inicio">
   <section class="hero" aria-labelledby="hero-titulo">
-    <img class="foto" src="img/hero.jpg" width="1600" height="1025" alt="Dron Agras aplicando sobre un cultivo de maravilla" fetchpriority="high">
+    <div class="media"><img src="img/hero.jpg" width="1600" height="1025" alt="Dron Agras aplicando sobre un cultivo de maravilla" fetchpriority="high"></div>
     <div class="wrap">
       <p class="eyebrow">Región Metropolitana · O'Higgins</p>
       <h1 id="hero-titulo">Aplicaciones agrícolas con dron, <em>con informe de cada hectárea</em></h1>
@@ -292,7 +310,7 @@ footer a { color: var(--band-ink); }
       </div>
       <div class="servicios">
         <article class="servicio">
-          <img src="img/liquidos.jpg" width="1000" height="625" loading="lazy" alt="Operador con traje de protección vertiendo producto líquido en el estanque del dron">
+          <img src="img/liquidos.jpg" width="1000" height="625" loading="lazy" alt="Dron Agras aplicando líquido: la nube de gotas baja sobre el cultivo">
           <div class="txt">
           <div class="ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 3c3 4 5 6.6 5 9.3A5 5 0 0 1 7 12.3C7 9.6 9 7 12 3Z"/><path d="M5 20h14"/></svg></div>
           <h3>Aspersión de líquidos</h3>
@@ -422,6 +440,23 @@ footer a { color: var(--band-ink); }
     </div>
   </section>
 
+  <section class="block" id="instagram" aria-labelledby="ig-titulo" style="padding-top: 0">
+    <div class="wrap">
+      <div class="ig-head">
+        <div class="head" style="margin-bottom: 0">
+          <p class="eyebrow">Instagram</p>
+          <h2 id="ig-titulo">Lo último desde el terreno</h2>
+        </div>
+        <a class="btn" href="https://www.instagram.com/droneranco/" target="_blank" rel="noopener">Seguir a @droneranco</a>
+      </div>
+      <div class="ig-grid">
+        <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DdFdoqDOw3P/" data-instgrm-version="14"><a class="ig-card" href="https://www.instagram.com/reel/DdFdoqDOw3P/" target="_blank" rel="noopener"><span class="quien"><i></i>@droneranco</span><span class="eyebrow">Reel · septiembre 2026</span><p>Acción, precisión y cobertura en tiempo real. En cada vuelo combinamos tecnología aérea con criterio agronómico.</p><span class="ver">Ver en Instagram →</span></a></blockquote>
+        <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DdCsu0-hPXO/" data-instgrm-version="14"><a class="ig-card" href="https://www.instagram.com/p/DdCsu0-hPXO/" target="_blank" rel="noopener"><span class="quien"><i></i>@droneranco</span><span class="eyebrow">Septiembre 2026</span><p>Pulverización de líquidos de alto rendimiento: protección fitosanitaria rápida, con buena gota y penetración en el follaje.</p><span class="ver">Ver en Instagram →</span></a></blockquote>
+        <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DdCtAuqB1we/" data-instgrm-version="14"><a class="ig-card" href="https://www.instagram.com/p/DdCtAuqB1we/" target="_blank" rel="noopener"><span class="quien"><i></i>@droneranco</span><span class="eyebrow">Septiembre 2026</span><p>Cerca del agricultor, directo en el terreno: definimos junto a ti la dosis y la estrategia para cada vuelo.</p><span class="ver">Ver en Instagram →</span></a></blockquote>
+      </div>
+    </div>
+  </section>
+
   <section class="block cotizar" id="cotizar" aria-labelledby="cotizar-titulo">
     <div class="wrap cot-grid">
       <div>
@@ -523,6 +558,17 @@ footer a { color: var(--band-ink); }
     var tx = mk('text', { x: 10 + t[1] * bw + bw / 2, y: 114, 'text-anchor': 'middle', 'font-size': 9, fill: '#706d6e', 'font-family': 'Raleway, sans-serif' });
     tx.textContent = t[0]; svg.appendChild(tx);
   });
+
+  // Publicaciones de Instagram: el script oficial se carga solo cuando la sección se acerca a la pantalla
+  var ig = document.getElementById('instagram');
+  var cargarIg = function () {
+    if (window.instgrm) { window.instgrm.Embeds.process(); return; }
+    var sc = document.createElement('script'); sc.async = true; sc.src = 'https://www.instagram.com/embed.js'; document.body.appendChild(sc);
+  };
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (e) { if (e[0].isIntersecting) { io.disconnect(); cargarIg(); } }, { rootMargin: '600px' });
+    io.observe(ig);
+  } else { cargarIg(); }
 
   // Intro: el logo animado se muestra una vez por visita
   var intro = document.getElementById('intro');
