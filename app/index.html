@@ -156,7 +156,7 @@ body{padding-top:env(safe-area-inset-top)}
 <script>
 const LOGO = 'icon-192.png';
 const API_URL = 'https://script.google.com/macros/s/AKfycbyniS2Jnf7qTPAbWeG4okAzHkhNp9bpESim1Goy5VzpWjFY6XBbyZvYtZ_M94KhoRvE-g/exec';
-const VERSION = '1.1';
+const VERSION = '1.2';
 const DIAS = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
 const DIAS_L = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -401,8 +401,8 @@ function nuevoForm(a){
   const f = { uid: 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2,6), agendaId: a ? a.id : '', fecha: a ? a.fecha : S.d.hoy,
     cliente: a ? a.cliente : '', predio: a && !/^https?:/i.test(a.lugar||'') ? (a.lugar||'') : '', cultivo: a ? a.cultivo : '',
     tipo: TIPOS[0], equipo: a && a.dron === 'T70P' ? 'Agras T70P' : a && a.dron === 'T50' ? 'Agras T50' : '', piloto: (a && a.piloto) || S.d.piloto || '',
-    superficie: a ? a.hectareas : '', mojamiento: '', inicio: a ? a.hora : '', termino: '', vuelos: '', minutos: '', gota: '', temp: '', viento: '', obs: '',
-    productos: [], cuarteles: [], analisis: false, impactos: '', dv01: '', dv05: '', dv09: '', imagenes: {} };
+    superficie: a ? a.hectareas : '', mojamiento: '', inicio: a ? a.hora : '', termino: '', gota: '', obs: '',
+    productos: [], analisis: false, impactos: '', dv01: '', dv05: '', dv09: '', imagenes: {} };
   if (a && a.producto) a.producto.split(/;\s*/).forEach(function(p){ const m = p.match(/^(.*?)\s+(\d+(?:[.,]\d+)?)\s*([a-zA-ZáÁ.\/]+)?\s*$/); if (m) f.productos.push({ nombre: m[1], dosis: m[2], unidad: uni(m[3]) }); else if (p.trim()) f.productos.push({ nombre: p.trim(), dosis: '', unidad: 'lt/ha' }); });
   if (!f.productos.length) f.productos.push({ nombre: '', dosis: '', unidad: 'lt/ha' });
   if (a && /kg/.test(a.producto||'')) f.tipo = TIPOS[1];
@@ -435,7 +435,7 @@ function vInforme(){
   h += '<div><div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px">Tipo de aplicación</div>' + opciones('tipo', TIPOS, function(x){ return x.split(' ')[0].replace(/\/$/,''); }) + '</div></section>';
   h += '<section class="sec-card"><h2>Operación</h2><div class="g2">' + campo('superficie','Superficie (há)',{req:1,num:1,ph:'12,5'}) + campo('mojamiento','Mojamiento (L/há)',{req:1,num:1}) + campo('inicio','Inicio',{req:1,tipo:'time'});
   h += '<div class="f req" style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:var(--muted)"><span>Término <span style="color:var(--rojo)">*</span></span><div class="inline"><input type="time" value="' + esc(f.termino) + '" oninput="setF(\'termino\', this.value)" style="height:46px;border-radius:10px;border:1px solid var(--field);padding:0 8px;font-weight:600;flex:1;min-width:0"><button type="button" class="btn azul" style="padding:0 10px" onclick="ahora()">Ahora</button></div></div>';
-  h += campo('vuelos','N° de vuelos',{req:1,num:1}) + campo('minutos','Minutos de vuelo',{req:1,num:1}) + campo('gota','Gota (µm)',{num:1}) + campo('temp','Temperatura (°C)',{num:1}) + campo('viento','Viento (km/h)',{num:1}) + '</div></section>';
+  h += campo('gota','Gota (µm)',{num:1}) + '</div></section>';
   h += '<section class="sec-card"><h2>Productos</h2>';
   f.productos.forEach(function(p, i){
     h += '<div class="prod"><label class="f"><span>Producto ' + (i+1) + '</span><input list="dl-prod" value="' + esc(p.nombre) + '" oninput="S.form.productos[' + i + '].nombre=this.value;borrador()"></label>' +
@@ -444,13 +444,7 @@ function vInforme(){
       '<button type="button" class="quitar" aria-label="Quitar producto" onclick="S.form.productos.splice(' + i + ',1);if(!S.form.productos.length)S.form.productos.push({nombre:\'\',dosis:\'\',unidad:\'lt/ha\'});borrador();render()">✕</button></div>';
   });
   if (f.productos.length < 6) h += '<button type="button" class="mas-btn" onclick="S.form.productos.push({nombre:\'\',dosis:\'\',unidad:\'lt/ha\'});borrador();render()">+ Agregar producto</button>';
-  h += '</section><section class="sec-card"><h2>Cuarteles <span class="sub">(opcional)</span></h2>';
-  f.cuarteles.forEach(function(c, i){
-    const inp = function(k, l){ return '<label class="f"><span>' + l + '</span><input ' + (k!=='nombre'?'inputmode="decimal" ':'') + 'value="' + esc(c[k]) + '" oninput="S.form.cuarteles[' + i + '].' + k + '=this.value;borrador()"></label>'; };
-    h += '<div class="cuartel"><div class="fila"><b>Cuartel ' + (i+1) + '</b><button type="button" class="quitar" aria-label="Quitar cuartel" onclick="S.form.cuarteles.splice(' + i + ',1);borrador();render()">✕</button></div>' + inp('nombre','Nombre') + '<div class="g2">' + inp('ha','Superficie (há)') + inp('vuelos','Vuelos') + inp('litros','Caldo (L)') + inp('minutos','Minutos') + '</div></div>';
-  });
-  if (f.cuarteles.length < 5) h += '<button type="button" class="mas-btn" onclick="S.form.cuarteles.push({nombre:\'\',ha:\'\',vuelos:\'\',litros:\'\',minutos:\'\'});borrador();render()">+ Agregar cuartel</button>';
-  h += '</section><section class="sec-card"><h2>Evidencia</h2><div class="g2">' + tile('cuartel', 'Pantallazo del cuartel', 'Desde el control del Agras') + tile('foto', 'Foto de terreno', 'Toca para tomarla') + '</div>';
+  h += '</section><section class="sec-card"><h2>Evidencia</h2>' + tile('cuartel', 'Pantallazo del cuartel (mapa)', 'Desde el control del Agras');
   h += '<div class="switch"><span>¿Hiciste análisis de papel hidrosensible?</span><button type="button" aria-label="Análisis hidrosensible" class="' + (f.analisis?'on':'') + '" onclick="setF(\'analisis\', !S.form.analisis);render()"></button></div>';
   if (f.analisis) h += tile('analisis', 'Pantallazo del análisis', 'Leo las cifras automáticamente') + '<p class="sub">Si quieres, escribe las cifras (si las dejas vacías, se leen del pantallazo):</p><div class="g2">' + campo('impactos','Impactos (gotas/cm²)',{num:1}) + campo('dv05','DV0.5 (µm)',{num:1}) + campo('dv01','DV0.1 (µm)',{num:1}) + campo('dv09','DV0.9 (µm)',{num:1}) + '</div>';
   h += '</section><section class="sec-card"><label class="f"><span>Observaciones</span><textarea oninput="setF(\'obs\', this.value)">' + esc(f.obs) + '</textarea></label><button type="button" class="btn sec" onclick="if(confirm(\'¿Borrar este informe y empezar de nuevo?\')){S.form=null;localStorage.removeItem(\'ranco_borrador\');ir(\'hoy\')}">Descartar informe</button></section>';
@@ -480,11 +474,11 @@ function imagen(k, input){
 }
 function validar(f){
   const falta = [];
-  [['fecha','fecha'],['cliente','cliente'],['predio','predio'],['cultivo','cultivo'],['equipo','equipo'],['piloto','piloto'],['superficie','superficie'],['mojamiento','mojamiento'],['inicio','hora de inicio'],['termino','hora de término'],['vuelos','N° de vuelos'],['minutos','minutos de vuelo']].forEach(function(x){ if (!String(f[x[0]]||'').trim()) falta.push(x[1]); });
+  [['fecha','fecha'],['cliente','cliente'],['predio','predio'],['cultivo','cultivo'],['equipo','equipo'],['piloto','piloto'],['superficie','superficie'],['mojamiento','mojamiento'],['inicio','hora de inicio'],['termino','hora de término']].forEach(function(x){ if (!String(f[x[0]]||'').trim()) falta.push(x[1]); });
   if (!f.productos.some(function(p){ return String(p.nombre).trim(); })) falta.push('al menos un producto');
   if (falta.length) return 'Falta completar: ' + falta.join(', ') + '.';
   const malos = [];
-  ['superficie','mojamiento','vuelos','minutos'].forEach(function(k){ if (isNaN(num(f[k])) || num(f[k]) < 0) malos.push(k); });
+  ['superficie','mojamiento'].forEach(function(k){ if (isNaN(num(f[k])) || num(f[k]) < 0) malos.push(k); });
   f.productos.forEach(function(p, i){ if (String(p.nombre).trim() && (isNaN(num(p.dosis)) || num(p.dosis) < 0)) malos.push('dosis del producto ' + (i+1)); });
   if (malos.length) return 'Revisa estos números: ' + malos.join(', ') + '.';
   return '';
@@ -494,6 +488,9 @@ async function enviarInforme(){
   if (err) { S.error = err; render(); window.scrollTo(0,0); return; }
   const p = JSON.parse(JSON.stringify(f));
   p.productos = p.productos.filter(function(x){ return String(x.nombre).trim(); });
+  ['vuelos','minutos','temp','viento'].forEach(function(k){ delete p[k]; });
+  p.cuarteles = [];
+  if (p.imagenes) delete p.imagenes.foto;
   S.enviando = true; render();
   try {
     const r = await api('webGuardarInforme', p);
