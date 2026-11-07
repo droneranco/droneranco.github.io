@@ -1,5 +1,5 @@
 // Ranco · service worker: la app abre sin señal; los datos van siempre por la red.
-const CACHE = 'ranco-v1';
+const CACHE = 'ranco-v2';
 const BASE = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 
 self.addEventListener('install', function (e) {
