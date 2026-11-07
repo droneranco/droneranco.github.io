@@ -96,7 +96,8 @@ label.f.req>span::after{content:" *";color:var(--rojo)}
 .ac-list button{display:block;width:100%;text-align:left;padding:12px 14px;border:0;border-bottom:1px solid var(--line);background:none;font-size:15px;font-weight:600;cursor:pointer}
 .ac-list button:active,.ac-list button:hover{background:var(--soft)}
 .ac-vacio{padding:10px 14px;font-size:13px;color:var(--muted)}
-.prod{display:grid;grid-template-columns:minmax(0,1fr) 84px 92px 36px;gap:6px;align-items:end}
+.prod>label:first-child{grid-column:1/-1}
+.prod{display:grid;grid-template-columns:minmax(0,1fr) 110px 36px;gap:6px;align-items:end}
 .prod input,.prod select{height:44px;border-radius:10px;border:1px solid var(--field);padding:0 8px;font-weight:600;width:100%;min-width:0;background:#fff}
 .quitar{height:44px;border:0;background:none;color:var(--muted);cursor:pointer}
 .cuartel{border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px}
@@ -160,7 +161,7 @@ body{padding-top:env(safe-area-inset-top)}
 <script>
 const LOGO = 'icon-192.png';
 const API_URL = 'https://script.google.com/macros/s/AKfycbyniS2Jnf7qTPAbWeG4okAzHkhNp9bpESim1Goy5VzpWjFY6XBbyZvYtZ_M94KhoRvE-g/exec';
-const VERSION = '1.3';
+const VERSION = '1.4';
 const DIAS = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
 const DIAS_L = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
