@@ -97,6 +97,12 @@ label.f.req>span::after{content:" *";color:var(--rojo)}
 .ac-list button:active,.ac-list button:hover{background:var(--soft)}
 .ac-vacio{padding:10px 14px;font-size:13px;color:var(--muted)}
 .prod>label:first-child{grid-column:1/-1}
+.horas{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.hr{flex:0 0 auto;min-width:56px;text-align:center;border-radius:12px;background:var(--ground);padding:6px 4px;display:flex;flex-direction:column;gap:2px;font-size:12px}
+.hr b{font-size:16px}
+.v-ok{color:#2E6A12}.v-med{color:#9A5B00}.v-alto{color:#B3261E}
+.card p.climachip{font-size:13px;color:var(--ink)}
+.climadia{display:flex;gap:8px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:13px;margin-bottom:12px}
 .prod{display:grid;grid-template-columns:minmax(0,1fr) 110px 36px;gap:6px;align-items:end}
 .prod input,.prod select{height:44px;border-radius:10px;border:1px solid var(--field);padding:0 8px;font-weight:600;width:100%;min-width:0;background:#fff}
 .quitar{height:44px;border:0;background:none;color:var(--muted);cursor:pointer}
@@ -161,7 +167,7 @@ body{padding-top:env(safe-area-inset-top)}
 <script>
 const LOGO = 'icon-192.png';
 const API_URL = 'https://script.google.com/macros/s/AKfycbyniS2Jnf7qTPAbWeG4okAzHkhNp9bpESim1Goy5VzpWjFY6XBbyZvYtZ_M94KhoRvE-g/exec';
-const VERSION = '1.4';
+const VERSION = '1.5';
 const DIAS = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
 const DIAS_L = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -271,6 +277,7 @@ async function cargar(){
   if (b && !S.form) S.form = b;
   render();
   enviarCola();
+  climaInicio();
 }
 
 function nav(){
@@ -295,18 +302,129 @@ function render(){
   app.innerHTML = h + (S.vista === 'informe' ? '' : nav());
 }
 
+// ---------- USUARIO Y PILOTO ----------
+function usuarioSesion(){ return String((S.d && S.d.usuario) || localStorage.getItem('ranco_usuario') || ''); }
+// Piloto por defecto: el último que se usó en este teléfono; si no, el usuario de la sesión.
+// (S.d.piloto es el último piloto de cualquier persona, por eso no se usa si es otro nombre)
+function pilotoDefecto(){
+  const local = localStorage.getItem('ranco_piloto'); if (local) return local;
+  const u = usuarioSesion(), s = String((S.d && S.d.piloto) || '');
+  return s && u && normB(s.split(' ')[0]) === normB(u.split(' ')[0]) ? s : u;
+}
+
+// ---------- CLIMA (Open-Meteo, sin clave) ----------
+const CL = { pos: leerLocal('ranco_pos', null), datos: leerLocal('ranco_clima', null), lugares: {}, cargando: false, error: '' };
+const WMO = [[0,'☀️','Despejado'],[1,'🌤️','Mayormente despejado'],[2,'⛅','Parcialmente nublado'],[3,'☁️','Nublado'],[45,'🌫️','Niebla'],[51,'🌦️','Llovizna'],[56,'🌧️','Llovizna helada'],[61,'🌧️','Lluvia'],[66,'🌧️','Lluvia helada'],[71,'🌨️','Nieve'],[80,'🌦️','Chubascos'],[85,'🌨️','Chubascos de nieve'],[95,'⛈️','Tormenta']];
+function wmo(c){ let r = WMO[0]; WMO.forEach(function(x){ if (Number(c) >= x[0]) r = x; }); return r; }
+function rumbo(g){ return ['N','NE','E','SE','S','SO','O','NO'][Math.round((((Number(g)||0) % 360) + 360) % 360 / 45) % 8]; }
+function vClase(v){ return v == null || isNaN(v) ? '' : v <= 10 ? 'v-ok' : v <= 15 ? 'v-med' : 'v-alto'; }
+function r0(v){ return v == null || isNaN(v) ? '–' : Math.round(v); }
+function horaTxt(t){ const d = new Date(t); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
+function urlClima(lat, lon){
+  return 'https://api.open-meteo.com/v1/forecast?latitude=' + Number(lat).toFixed(4) + '&longitude=' + Number(lon).toFixed(4) +
+    '&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,wind_direction_10m,weather_code' +
+    '&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,wind_speed_10m,wind_gusts_10m,wind_direction_10m,weather_code' +
+    '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max' +
+    '&timezone=America%2FSantiago&forecast_days=7';
+}
+async function pedirClima(lat, lon){
+  const r = await fetch(urlClima(lat, lon)); if (!r.ok) throw new Error('clima ' + r.status);
+  const j = await r.json(); return { t: Date.now(), lat: lat, lon: lon, c: j.current, h: j.hourly, d: j.daily };
+}
+// Coordenadas escritas en el lugar o en un enlace de Google Maps (ej.: -33.76,-70.74)
+function coordsDe(txt){ let t = String(txt || ''); try { t = decodeURIComponent(t); } catch (e) {} const m = t.match(/(-\d{1,2}\.\d{3,})\s*,\s*(-\d{1,3}\.\d{3,})/); return m ? { lat: Number(m[1]), lon: Number(m[2]) } : null; }
+function repintarClima(){ if (S.d && (S.vista === 'hoy' || S.vista === 'agenda')) render(); }
+async function actualizarClima(gps){
+  if (CL.cargando) return;
+  CL.cargando = true; CL.error = '';
+  if (gps) repintarClima();
+  try {
+    if (gps || !CL.pos) {
+      if (!navigator.geolocation) throw new Error('Este teléfono no entrega la ubicación.');
+      const p = await new Promise(function(ok, mal){ navigator.geolocation.getCurrentPosition(ok, mal, { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 }); });
+      const nuevo = { lat: p.coords.latitude, lon: p.coords.longitude, t: Date.now(), nombre: '' };
+      if (CL.pos && Math.abs(CL.pos.lat - nuevo.lat) + Math.abs(CL.pos.lon - nuevo.lon) < 0.02) nuevo.nombre = CL.pos.nombre || '';
+      if (!nuevo.nombre) {
+        try { const g = await fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + nuevo.lat + '&longitude=' + nuevo.lon + '&localityLanguage=es').then(function(r){ return r.json(); }); nuevo.nombre = g.city || g.locality || ''; } catch (e) {}
+      }
+      CL.pos = nuevo; guardarLocal('ranco_pos', CL.pos);
+    }
+    CL.datos = await pedirClima(CL.pos.lat, CL.pos.lon); guardarLocal('ranco_clima', CL.datos);
+  } catch (e) {
+    CL.error = e && e.code === 1 ? 'Activa el permiso de ubicación para ver el clima de aquí.' : e && e.code ? 'No pude obtener tu ubicación.' : (navigator.onLine ? 'No pude obtener el clima.' : 'Sin señal: muestro el último clima guardado.');
+  }
+  CL.cargando = false; repintarClima();
+}
+async function climaInicio(){
+  let permitido = false;
+  try { permitido = (await navigator.permissions.query({ name: 'geolocation' })).state === 'granted'; } catch (e) {}
+  const viejo = !CL.datos || Date.now() - CL.datos.t > 30 * 60000;
+  if (permitido && viejo) actualizarClima(true);
+  else if (CL.pos && viejo) actualizarClima(false);
+}
+setInterval(function(){ if (document.visibilityState === 'visible' && navigator.onLine && CL.pos && CL.datos && Date.now() - CL.datos.t > 30 * 60000) actualizarClima(false); }, 300000);
+function horaClima(d, fecha, hora){
+  if (!d || !d.h) return null;
+  const hh = ('0' + String(hora || '08').split(':')[0]).slice(-2);
+  const k = d.h.time.indexOf(fecha + 'T' + hh + ':00'); if (k < 0) return null;
+  return { ws: d.h.wind_speed_10m[k], wg: d.h.wind_gusts_10m[k], wd: d.h.wind_direction_10m[k], t: d.h.temperature_2m[k], pp: d.h.precipitation_probability[k], hu: d.h.relative_humidity_2m[k], wc: d.h.weather_code[k] };
+}
+function tarjetaClima(){
+  const d = CL.datos;
+  let h = '<h2 class="sec">Clima' + (CL.pos && CL.pos.nombre ? ' · ' + esc(CL.pos.nombre) : ' aquí') + '</h2>';
+  if (!d) return h + '<div class="card"><p>' + (CL.error ? esc(CL.error) : 'Viento, temperatura y lluvia de donde estás, hora por hora.') + '</p><button class="btn sec" onclick="actualizarClima(true)"' + (CL.cargando ? ' disabled' : '') + '>' + (CL.cargando ? 'Buscando…' : '📍 Ver clima de aquí') + '</button></div>';
+  const ahora = new Date(), clave = iso(ahora) + 'T' + ('0' + ahora.getHours()).slice(-2) + ':00';
+  let k = d.h.time.indexOf(clave);
+  const reciente = Date.now() - d.t < 90 * 60000;
+  const c = reciente || k < 0 ? { t: d.c.temperature_2m, hu: d.c.relative_humidity_2m, ws: d.c.wind_speed_10m, wg: d.c.wind_gusts_10m, wd: d.c.wind_direction_10m, wc: d.c.weather_code }
+    : { t: d.h.temperature_2m[k], hu: d.h.relative_humidity_2m[k], ws: d.h.wind_speed_10m[k], wg: d.h.wind_gusts_10m[k], wd: d.h.wind_direction_10m[k], wc: d.h.weather_code[k] };
+  if (k < 0) k = 0;
+  const w = wmo(c.wc);
+  h += '<div class="card"><div class="fila" style="align-items:center;gap:12px"><span style="font-size:38px;line-height:1">' + w[1] + '</span>' +
+    '<div style="flex:1"><b style="font-size:26px">' + r0(c.t) + ' °C</b><p>' + w[2] + ' · humedad ' + r0(c.hu) + '%</p></div>' +
+    '<div style="text-align:right"><b class="' + vClase(c.ws) + '" style="font-size:20px">' + r0(c.ws) + ' km/h</b><p>viento ' + rumbo(c.wd) + ' · ráfagas ' + r0(c.wg) + '</p></div></div>';
+  h += '<div class="horas">';
+  for (let i = k + 1; i < Math.min(k + 13, d.h.time.length); i++) {
+    h += '<div class="hr"><small>' + d.h.time[i].slice(11, 16) + '</small><span>' + wmo(d.h.weather_code[i])[1] + '</span><b class="' + vClase(d.h.wind_speed_10m[i]) + '">' + r0(d.h.wind_speed_10m[i]) + '</b><small>' + r0(d.h.temperature_2m[i]) + '° · ' + r0(d.h.precipitation_probability[i]) + '%</small></div>';
+  }
+  h += '</div><p style="font-size:12px">Viento en km/h: <b class="v-ok">verde hasta 10</b>, <b class="v-med">ámbar 10 a 15</b>, <b class="v-alto">rojo sobre 15</b>. El % es la probabilidad de lluvia.</p>';
+  h += '<div class="fila" style="align-items:center"><p style="flex:1;font-size:12px">' + (CL.error ? esc(CL.error) + ' · ' : '') + 'Actualizado ' + horaTxt(d.t) + ' · Open-Meteo</p>' +
+    '<button class="btn sec" style="height:36px;padding:0 14px" aria-label="Actualizar clima" onclick="actualizarClima(true)"' + (CL.cargando ? ' disabled' : '') + '>' + (CL.cargando ? '…' : '↻') + '</button></div></div>';
+  return h;
+}
+// Pronóstico a la hora de la aplicación: en el lugar (si tiene coordenadas) o donde estás
+function chipClima(a){
+  const pc = coordsDe(a.lugar);
+  let d = CL.datos, donde = 'donde estás';
+  if (pc) {
+    const key = pc.lat.toFixed(3) + ',' + pc.lon.toFixed(3);
+    d = CL.lugares[key]; donde = 'en el lugar';
+    if (!d && !CL.lugares['_' + key]) { CL.lugares['_' + key] = 1; pedirClima(pc.lat, pc.lon).then(function(x){ CL.lugares[key] = x; repintarClima(); }).catch(function(){}); }
+  }
+  const x = horaClima(d, a.fecha, a.hora);
+  if (!x) return '';
+  return '<p class="climachip">' + wmo(x.wc)[1] + ' A las ' + esc(String(a.hora).slice(0, 5)) + ', ' + donde + ': viento <b class="' + vClase(x.ws) + '">' + r0(x.ws) + ' km/h</b> ' + rumbo(x.wd) + ' (ráfagas ' + r0(x.wg) + ') · ' + r0(x.t) + ' °C · lluvia ' + r0(x.pp) + '%</p>';
+}
+function resumenDiaClima(f){
+  const d = CL.datos; if (!d || !d.d) return '';
+  const k = d.d.time.indexOf(f); if (k < 0) return '';
+  const w = wmo(d.d.weather_code[k]);
+  return '<div class="climadia"><span style="font-size:22px;line-height:1">' + w[1] + '</span><span style="flex:1">' + w[2] + ' · ' + r0(d.d.temperature_2m_min[k]) + ' a ' + r0(d.d.temperature_2m_max[k]) + ' °C · viento máx. <b class="' + vClase(d.d.wind_speed_10m_max[k]) + '">' + r0(d.d.wind_speed_10m_max[k]) + ' km/h</b> (ráfagas ' + r0(d.d.wind_gusts_10m_max[k]) + ') · lluvia ' + r0(d.d.precipitation_probability_max[k]) + '%' + (CL.pos && CL.pos.nombre ? ' · ' + esc(CL.pos.nombre) : '') + '</span></div>';
+}
+
 // ---------- HOY ----------
 function vHoy(){
   const hoy = S.d.hoy, ag = S.d.agenda.filter(function(a){ return a.fecha === hoy; });
   const ha = ag.reduce(function(s,a){ return s + (num(a.hectareas)||0); }, 0);
   const q = cola();
   const pend = S.d.pendientes.length + q.length;
-  const nombre = (S.d.piloto || '').split(' ')[0];
+  const nombre = usuarioSesion().split(' ')[0];
   let h = '<div class="top"><div class="marca"><img src="' + LOGO + '" alt="">RANCO</div>' +
     (q.length ? '<button class="pill amber" onclick="enviarCola(true)">' + I.nube + ' ' + q.length + ' por enviar · reintentar</button>' : (navigator.onLine ? '' : '<span class="pill amber">' + I.nube + ' Sin señal</span>')) + '</div>';
   h += bannerInstalar();
   h += '<div class="pad"><p class="sub">' + esc(larga(hoy).replace(/^./, function(c){return c.toUpperCase();})) + '</p><h1>Hola' + (nombre ? ', ' + esc(nombre) : '') + '</h1></div>';
   h += '<div class="stats"><div class="stat"><b>' + ag.length + '</b><span>aplicaciones hoy</span></div><div class="stat"><b>' + fmt(ha) + '</b><span>há programadas</span></div><div class="stat"><b style="color:' + (pend?'#9A5B00':'inherit') + '">' + pend + '</b><span>informes pendientes</span></div></div>';
+  h += tarjetaClima();
   h += '<h2 class="sec">Hoy</h2><div class="lista">';
   if (!ag.length) h += '<div class="card"><p class="vacio">No hay aplicaciones agendadas para hoy.</p><div class="fila"><button class="btn sec" style="flex:1" onclick="abrirAgenda(null)">Agendar</button><button class="btn" style="flex:1" onclick="abrirInforme(null)">' + I.doc + 'Nuevo informe</button></div></div>';
   ag.forEach(function(a){ h += tarjetaHoy(a); });
@@ -325,6 +443,7 @@ function tarjetaHoy(a){
   const mapa = a.lugar ? (/^https?:/i.test(a.lugar) ? a.lugar : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(a.lugar)) : '';
   let h = '<article class="card"><div class="fila"><span class="hora">' + a.hora + ' – ' + finHora(a) + '</span>' + (a.dron ? '<span class="tag' + (/T50/.test(a.dron)&&!/T70/.test(a.dron)?' azul':'') + '">' + esc(a.dron) + '</span>' : '') + '</div>';
   h += '<div><h3>' + esc(a.cliente) + '</h3>' + (det ? '<p>' + esc(det) + '</p>' : '') + '</div>';
+  if (!hecha) h += chipClima(a);
   if (a.producto) h += '<div class="chips">' + a.producto.split(/;\s*/).map(function(p){ return '<span class="chip">' + esc(p) + '</span>'; }).join('') + '</div>';
   if (hecha) h += '<div class="fila"><span class="tag gris">✓ Informe ' + esc(a.informe) + '</span></div>';
   else h += '<div class="fila"><button class="btn" style="flex:1" onclick="abrirInforme(\'' + a.id + '\')">' + I.doc + 'Iniciar informe</button>' + (mapa ? '<a class="btn sec icon" aria-label="Cómo llegar" href="' + esc(mapa) + '" target="_blank" rel="noopener">' + I.pin + '</a>' : '') + '</div>';
@@ -346,7 +465,7 @@ function vAgenda(){
   }
   h += '<button class="flecha" aria-label="Semana siguiente" onclick="moverSemana(7)">' + I.der + '</button></div>';
   const delDia = S.d.agenda.filter(function(a){ return a.fecha === S.dia; });
-  h += '<div class="pad" style="padding-top:14px">';
+  h += '<div class="pad" style="padding-top:14px">' + resumenDiaClima(S.dia);
   if (!delDia.length) h += '<p class="vacio">Sin aplicaciones el ' + esc(larga(S.dia)) + '.</p>';
   delDia.forEach(function(a){
     const det = [a.cultivo, a.hectareas ? a.hectareas + ' há' : '', a.dron, 'hasta ' + finHora(a)].filter(Boolean).join(' · ');
@@ -367,7 +486,7 @@ function moverSemana(n){ S.semana = sumar(S.semana, n); S.dia = sumar(S.dia, n);
 function elegirDia(f){ S.dia = f; render(); }
 
 function abrirAgenda(id){
-  const a = id ? S.d.agenda.filter(function(x){ return x.id === id; })[0] : { fecha: S.vista==='agenda' ? S.dia : sumar(S.d.hoy,1), hora: '08:00', duracion: 3, piloto: S.d.piloto };
+  const a = id ? S.d.agenda.filter(function(x){ return x.id === id; })[0] : { fecha: S.vista==='agenda' ? S.dia : sumar(S.d.hoy,1), hora: '08:00', duracion: 3, piloto: pilotoDefecto() };
   S.edAg = JSON.parse(JSON.stringify(a || {}));
   pintarModalAgenda();
 }
@@ -406,7 +525,7 @@ async function cancelarAgenda(){
 function nuevoForm(a){
   const f = { uid: 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2,6), agendaId: a ? a.id : '', fecha: a ? a.fecha : S.d.hoy,
     cliente: a ? a.cliente : '', predio: a && !/^https?:/i.test(a.lugar||'') ? (a.lugar||'') : '', cultivo: a ? a.cultivo : '',
-    tipo: TIPOS[0], equipo: a && a.dron === 'T70P' ? 'Agras T70P' : a && a.dron === 'T50' ? 'Agras T50' : '', piloto: (a && a.piloto) || S.d.piloto || '',
+    tipo: TIPOS[0], equipo: a && a.dron === 'T70P' ? 'Agras T70P' : a && a.dron === 'T50' ? 'Agras T50' : '', piloto: (a && a.piloto) || pilotoDefecto(),
     superficie: a ? a.hectareas : '', mojamiento: '', inicio: a ? a.hora : '', termino: '', gota: '', obs: '',
     productos: [], analisis: false, impactos: '', dv01: '', dv05: '', dv09: '', imagenes: {} };
   if (a && a.producto) a.producto.split(/;\s*/).forEach(function(p){ const m = p.match(/^(.*?)\s+(\d+(?:[.,]\d+)?)\s*([a-zA-ZáÁ.\/]+)?\s*$/); if (m) f.productos.push({ nombre: m[1], dosis: m[2], unidad: uni(m[3]) }); else if (p.trim()) f.productos.push({ nombre: p.trim(), dosis: '', unidad: 'lt/ha' }); });
@@ -535,6 +654,7 @@ async function enviarInforme(){
   const f = S.form, err = validar(f);
   if (err) { S.error = err; render(); window.scrollTo(0,0); return; }
   const p = JSON.parse(JSON.stringify(f));
+  if (String(f.piloto||'').trim()) localStorage.setItem('ranco_piloto', String(f.piloto).trim());
   p.productos = p.productos.filter(function(x){ return String(x.nombre).trim(); });
   ['vuelos','minutos','temp','viento'].forEach(function(k){ delete p[k]; });
   p.cuarteles = [];
@@ -591,7 +711,7 @@ function vCliente(){
   const tel = String(c.telefono||'').replace(/[^\d+]/g,'');
   h += '<div class="stats" style="grid-template-columns:repeat(3,minmax(0,1fr))">' +
     (tel ? '<a class="btn sec" href="https://wa.me/' + tel.replace(/^\+/,'') + '" target="_blank" rel="noopener">WhatsApp</a><a class="btn sec" href="tel:' + tel + '">Llamar</a>' : '<span></span><span></span>') +
-    '<button class="btn" onclick="S.edAg={cliente:S.cliente.nombre,fecha:\'' + sumar(S.d.hoy,1) + '\',hora:\'08:00\',duracion:3,piloto:S.d.piloto};pintarModalAgenda()">Agendar</button></div>';
+    '<button class="btn" onclick="S.edAg={cliente:S.cliente.nombre,fecha:\'' + sumar(S.d.hoy,1) + '\',hora:\'08:00\',duracion:3,piloto:pilotoDefecto()};pintarModalAgenda()">Agendar</button></div>';
   if (!c.historial) return h + '<p class="cargando">Cargando historial…</p>';
   const tot = c.historial.reduce(function(s,x){ return s + x.ha; }, 0);
   h += '<div class="stats"><div class="stat"><b>' + fmt(tot) + '</b><span>há aplicadas</span></div><div class="stat"><b>' + c.historial.length + '</b><span>aplicaciones</span></div><div class="stat"><b>' + (c.historial[0] ? corta(c.historial[0].fecha) : '—') + '</b><span>última</span></div></div>';
