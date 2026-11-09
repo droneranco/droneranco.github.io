@@ -167,7 +167,7 @@ body{padding-top:env(safe-area-inset-top)}
 <script>
 const LOGO = 'icon-192.png';
 const API_URL = 'https://script.google.com/macros/s/AKfycbyniS2Jnf7qTPAbWeG4okAzHkhNp9bpESim1Goy5VzpWjFY6XBbyZvYtZ_M94KhoRvE-g/exec';
-const VERSION = '1.5';
+const VERSION = '1.6';
 const DIAS = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
 const DIAS_L = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -313,7 +313,7 @@ function pilotoDefecto(){
 }
 
 // ---------- CLIMA (Open-Meteo, sin clave) ----------
-const CL = { pos: leerLocal('ranco_pos', null), datos: leerLocal('ranco_clima', null), lugares: {}, cargando: false, error: '' };
+const CL = { pos: leerLocal('ranco_pos', null), datos: leerLocal('ranco_clima', null), lugares: {}, cargando: false, error: '', sinPermiso: false, buscar: false, opciones: [] };
 const WMO = [[0,'☀️','Despejado'],[1,'🌤️','Mayormente despejado'],[2,'⛅','Parcialmente nublado'],[3,'☁️','Nublado'],[45,'🌫️','Niebla'],[51,'🌦️','Llovizna'],[56,'🌧️','Llovizna helada'],[61,'🌧️','Lluvia'],[66,'🌧️','Lluvia helada'],[71,'🌨️','Nieve'],[80,'🌦️','Chubascos'],[85,'🌨️','Chubascos de nieve'],[95,'⛈️','Tormenta']];
 function wmo(c){ let r = WMO[0]; WMO.forEach(function(x){ if (Number(c) >= x[0]) r = x; }); return r; }
 function rumbo(g){ return ['N','NE','E','SE','S','SO','O','NO'][Math.round((((Number(g)||0) % 360) + 360) % 360 / 45) % 8]; }
@@ -339,9 +339,10 @@ async function actualizarClima(gps){
   CL.cargando = true; CL.error = '';
   if (gps) repintarClima();
   try {
-    if (gps || !CL.pos) {
+    if ((gps || !CL.pos) && !(CL.pos && CL.pos.manual && !gps)) {
       if (!navigator.geolocation) throw new Error('Este teléfono no entrega la ubicación.');
       const p = await new Promise(function(ok, mal){ navigator.geolocation.getCurrentPosition(ok, mal, { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 }); });
+      CL.sinPermiso = false;
       const nuevo = { lat: p.coords.latitude, lon: p.coords.longitude, t: Date.now(), nombre: '' };
       if (CL.pos && Math.abs(CL.pos.lat - nuevo.lat) + Math.abs(CL.pos.lon - nuevo.lon) < 0.02) nuevo.nombre = CL.pos.nombre || '';
       if (!nuevo.nombre) {
@@ -351,9 +352,40 @@ async function actualizarClima(gps){
     }
     CL.datos = await pedirClima(CL.pos.lat, CL.pos.lon); guardarLocal('ranco_clima', CL.datos);
   } catch (e) {
-    CL.error = e && e.code === 1 ? 'Activa el permiso de ubicación para ver el clima de aquí.' : e && e.code ? 'No pude obtener tu ubicación.' : (navigator.onLine ? 'No pude obtener el clima.' : 'Sin señal: muestro el último clima guardado.');
+    CL.sinPermiso = !!(e && e.code === 1);
+    CL.error = e && e.code === 1 ? 'El teléfono no está entregando la ubicación a Ranco.' : e && e.code ? 'No pude obtener tu ubicación.' : (navigator.onLine ? 'No pude obtener el clima.' : 'Sin señal: muestro el último clima guardado.');
+    if (e && e.code && CL.pos && CL.pos.manual) { try { CL.datos = await pedirClima(CL.pos.lat, CL.pos.lon); guardarLocal('ranco_clima', CL.datos); } catch (e2) {} }
   }
   CL.cargando = false; repintarClima();
+}
+// Elegir el lugar a mano (sin GPS): busca la comuna en Open-Meteo
+async function buscarLugar(ev){
+  if (ev) ev.preventDefault();
+  const q = (document.getElementById('cl-q') || {}).value || '';
+  if (q.trim().length < 2) return;
+  CL.opciones = []; CL.error = ''; CL.cargando = true; repintarClima();
+  try {
+    const j = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=6&language=es&countryCode=CL&name=' + encodeURIComponent(q.trim())).then(function(r){ return r.json(); });
+    CL.opciones = (j.results || []).map(function(x){ return { lat: x.latitude, lon: x.longitude, nombre: x.name, region: x.admin1 || '' }; });
+    if (!CL.opciones.length) CL.error = 'No encontré «' + q.trim() + '». Prueba con el nombre de la comuna.';
+  } catch (e) { CL.error = navigator.onLine ? 'No pude buscar el lugar.' : 'Sin señal para buscar el lugar.'; }
+  CL.cargando = false; CL.buscarTxt = q; repintarClima();
+}
+async function elegirLugar(i){
+  const o = CL.opciones[i]; if (!o) return;
+  CL.pos = { lat: o.lat, lon: o.lon, nombre: o.nombre, t: Date.now(), manual: true }; guardarLocal('ranco_pos', CL.pos);
+  CL.opciones = []; CL.buscar = false; CL.datos = null; CL.error = '';
+  CL.cargando = false; await actualizarClima(false);
+}
+function cajaLugar(){
+  let h = '<form class="fila" style="gap:8px;margin-top:10px" onsubmit="buscarLugar(event)"><input id="cl-q" placeholder="Escribe la comuna (ej.: Paine)" value="' + esc(CL.buscarTxt || '') + '" style="flex:1;min-width:0;height:44px;border:1px solid var(--line);border-radius:12px;padding:0 12px;font:inherit"><button class="btn sec" style="height:44px"' + (CL.cargando ? ' disabled' : '') + '>Buscar</button></form>';
+  if (CL.opciones.length) h += '<div class="lista" style="margin-top:8px">' + CL.opciones.map(function(o, i){ return '<button class="btn sec" style="justify-content:flex-start;height:auto;padding:10px 12px;text-align:left" onclick="elegirLugar(' + i + ')">📍 ' + esc(o.nombre) + (o.region ? ' <small style="color:var(--muted)">· ' + esc(o.region) + '</small>' : '') + '</button>'; }).join('') + '</div>';
+  return h;
+}
+function ayudaPermiso(){
+  if (!CL.sinPermiso) return '';
+  if (esIOS()) return '<p style="font-size:13px;margin-top:8px"><b>Para usar el GPS en el iPhone:</b> Ajustes › Privacidad y seguridad › Localización (activada) › <b>Sitios web de Safari</b> › «Al usar la app». Después cierra Ranco, ábrelo de nuevo y toca 📍. Mientras tanto, puedes elegir la comuna aquí abajo.</p>';
+  return '<p style="font-size:13px;margin-top:8px"><b>Para usar el GPS:</b> activa la ubicación del teléfono y dale permiso a Chrome para droneranco.com (candado junto a la dirección › Permisos › Ubicación). Mientras tanto, puedes elegir la comuna aquí abajo.</p>';
 }
 async function climaInicio(){
   let permitido = false;
@@ -372,7 +404,7 @@ function horaClima(d, fecha, hora){
 function tarjetaClima(){
   const d = CL.datos;
   let h = '<h2 class="sec">Clima' + (CL.pos && CL.pos.nombre ? ' · ' + esc(CL.pos.nombre) : ' aquí') + '</h2>';
-  if (!d) return h + '<div class="card"><p>' + (CL.error ? esc(CL.error) : 'Viento, temperatura y lluvia de donde estás, hora por hora.') + '</p><button class="btn sec" onclick="actualizarClima(true)"' + (CL.cargando ? ' disabled' : '') + '>' + (CL.cargando ? 'Buscando…' : '📍 Ver clima de aquí') + '</button></div>';
+  if (!d) return h + '<div class="card"><p>' + (CL.error ? esc(CL.error) : 'Viento, temperatura y lluvia de donde estás, hora por hora.') + '</p>' + ayudaPermiso() + '<button class="btn sec" onclick="actualizarClima(true)"' + (CL.cargando ? ' disabled' : '') + '>' + (CL.cargando ? 'Buscando…' : '📍 Ver clima de aquí') + '</button><p style="font-size:13px;margin-top:12px">o elige la comuna:</p>' + cajaLugar() + '</div>';
   const ahora = new Date(), clave = iso(ahora) + 'T' + ('0' + ahora.getHours()).slice(-2) + ':00';
   let k = d.h.time.indexOf(clave);
   const reciente = Date.now() - d.t < 90 * 60000;
@@ -389,13 +421,15 @@ function tarjetaClima(){
   }
   h += '</div><p style="font-size:12px">Viento en km/h: <b class="v-ok">verde hasta 10</b>, <b class="v-med">ámbar 10 a 15</b>, <b class="v-alto">rojo sobre 15</b>. El % es la probabilidad de lluvia.</p>';
   h += '<div class="fila" style="align-items:center"><p style="flex:1;font-size:12px">' + (CL.error ? esc(CL.error) + ' · ' : '') + 'Actualizado ' + horaTxt(d.t) + ' · Open-Meteo</p>' +
-    '<button class="btn sec" style="height:36px;padding:0 14px" aria-label="Actualizar clima" onclick="actualizarClima(true)"' + (CL.cargando ? ' disabled' : '') + '>' + (CL.cargando ? '…' : '↻') + '</button></div></div>';
+    '<button class="btn sec" style="height:36px;padding:0 12px;font-size:13px" onclick="CL.buscar=!CL.buscar;CL.opciones=[];repintarClima()">📍 Lugar</button>' +
+    '<button class="btn sec" style="height:36px;padding:0 14px" aria-label="Actualizar clima con el GPS" onclick="actualizarClima(true)"' + (CL.cargando ? ' disabled' : '') + '>' + (CL.cargando ? '…' : '↻') + '</button></div>' +
+    (CL.buscar || (CL.sinPermiso && !(CL.pos && CL.pos.manual)) ? ayudaPermiso() + cajaLugar() : '') + '</div>';
   return h;
 }
 // Pronóstico a la hora de la aplicación: en el lugar (si tiene coordenadas) o donde estás
 function chipClima(a){
   const pc = coordsDe(a.lugar);
-  let d = CL.datos, donde = 'donde estás';
+  let d = CL.datos, donde = CL.pos && CL.pos.manual && CL.pos.nombre ? 'en ' + CL.pos.nombre : 'donde estás';
   if (pc) {
     const key = pc.lat.toFixed(3) + ',' + pc.lon.toFixed(3);
     d = CL.lugares[key]; donde = 'en el lugar';
