@@ -167,7 +167,7 @@ body{padding-top:env(safe-area-inset-top)}
 <script>
 const LOGO = 'icon-192.png';
 const API_URL = 'https://script.google.com/macros/s/AKfycbyniS2Jnf7qTPAbWeG4okAzHkhNp9bpESim1Goy5VzpWjFY6XBbyZvYtZ_M94KhoRvE-g/exec';
-const VERSION = '1.6';
+const VERSION = '1.7';
 const DIAS = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
 const DIAS_L = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -561,7 +561,7 @@ function nuevoForm(a){
     cliente: a ? a.cliente : '', predio: a && !/^https?:/i.test(a.lugar||'') ? (a.lugar||'') : '', cultivo: a ? a.cultivo : '',
     tipo: TIPOS[0], equipo: a && a.dron === 'T70P' ? 'Agras T70P' : a && a.dron === 'T50' ? 'Agras T50' : '', piloto: (a && a.piloto) || pilotoDefecto(),
     superficie: a ? a.hectareas : '', mojamiento: '', inicio: a ? a.hora : '', termino: '', gota: '', obs: '',
-    productos: [], analisis: false, impactos: '', dv01: '', dv05: '', dv09: '', imagenes: {} };
+    productos: [], mezclaCliente: false, sinProductos: false, sinHora: false, analisis: false, impactos: '', dv01: '', dv05: '', dv09: '', imagenes: {} };
   if (a && a.producto) a.producto.split(/;\s*/).forEach(function(p){ const m = p.match(/^(.*?)\s+(\d+(?:[.,]\d+)?)\s*([a-zA-ZáÁ.\/]+)?\s*$/); if (m) f.productos.push({ nombre: m[1], dosis: m[2], unidad: uni(m[3]) }); else if (p.trim()) f.productos.push({ nombre: p.trim(), dosis: '', unidad: 'lt/ha' }); });
   if (!f.productos.length) f.productos.push({ nombre: '', dosis: '', unidad: 'lt/ha' });
   if (a && /kg/.test(a.producto||'')) f.tipo = TIPOS[1];
@@ -634,23 +634,29 @@ function vInforme(){
   h += '<section class="sec-card"><h2>Datos generales</h2>' + dlc + dlp + '<div class="g2">' + campo('fecha','Fecha',{req:1,tipo:'date'}) + campo('cliente','Cliente',{req:1,list:'dl-cli'}) + campo('predio','Predio / campo',{req:1}) + campo('cultivo','Cultivo',{req:1}) + '</div>' + campo('piloto','Piloto / aplicador',{req:1});
   h += '<div><div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px">Equipo <span style="color:var(--rojo)">*</span></div>' + opciones('equipo', EQUIPOS) + '</div>';
   h += '<div><div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px">Tipo de aplicación</div>' + opciones('tipo', TIPOS, function(x){ return x.split(' ')[0].replace(/\/$/,''); }) + '</div></section>';
-  h += '<section class="sec-card"><h2>Operación</h2><div class="g2">' + campo('superficie','Superficie (há)',{req:1,num:1,ph:'12,5'}) + campo('mojamiento','Mojamiento (L/há)',{req:1,num:1}) + campo('inicio','Inicio',{req:1,tipo:'time'});
-  h += '<div class="f req" style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:var(--muted)"><span>Término <span style="color:var(--rojo)">*</span></span><div class="inline"><input type="time" value="' + esc(f.termino) + '" oninput="setF(\'termino\', this.value)" style="height:46px;border-radius:10px;border:1px solid var(--field);padding:0 8px;font-weight:600;flex:1;min-width:0"><button type="button" class="btn azul" style="padding:0 10px" onclick="ahora()">Ahora</button></div></div>';
-  h += campo('gota','Gota (µm)',{num:1}) + '</div></section>';
-  h += '<section class="sec-card"><h2>Productos</h2>';
-  f.productos.forEach(function(p, i){
+  h += '<section class="sec-card"><h2>Operación</h2><div class="g2">' + campo('superficie','Superficie (há)',{req:1,num:1,ph:'12,5'}) + campo('mojamiento','Mojamiento (L/há)',{req:1,num:1});
+  if (!f.sinHora) {
+    h += campo('inicio','Inicio',{req:1,tipo:'time'});
+    h += '<div class="f req" style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:var(--muted)"><span>Término <span style="color:var(--rojo)">*</span></span><div class="inline"><input type="time" value="' + esc(f.termino) + '" oninput="setF(\'termino\', this.value)" style="height:46px;border-radius:10px;border:1px solid var(--field);padding:0 8px;font-weight:600;flex:1;min-width:0"><button type="button" class="btn azul" style="padding:0 10px" onclick="ahora()">Ahora</button></div></div>';
+  }
+  h += campo('gota','Gota (µm)',{num:1}) + '</div>' + interruptor('sinHora', 'Sin hora registrada', 'No se anotó la hora de inicio ni de término') + '</section>';
+  h += '<section class="sec-card"><h2>Productos</h2>' + interruptor('mezclaCliente', 'Mezcla preparada por el cliente', 'Anota los productos si los conoces; la dosis es opcional') + interruptor('sinProductos', 'Sin registro de productos', 'No hay información de qué se aplicó');
+  if (!f.sinProductos) f.productos.forEach(function(p, i){
     h += '<div class="prod"><label class="f"><span>Producto ' + (i+1) + '</span><input autocomplete="off" placeholder="Escribe para buscar" value="' + esc(p.nombre) + '" oninput="S.form.productos[' + i + '].nombre=this.value;borrador();acBuscar(this,' + i + ')" onfocus="acBuscar(this,' + i + ')" onblur="setTimeout(acCerrar,200)"></label>' +
       '<label class="f"><span>Dosis</span><input inputmode="decimal" value="' + esc(p.dosis) + '" oninput="S.form.productos[' + i + '].dosis=this.value;borrador()"></label>' +
       '<label class="f"><span>Unidad</span><select onchange="S.form.productos[' + i + '].unidad=this.value;borrador()">' + UNIDADES.map(function(u){ return '<option' + (p.unidad===u?' selected':'') + '>' + u + '</option>'; }).join('') + '</select></label>' +
       '<button type="button" class="quitar" aria-label="Quitar producto" onclick="S.form.productos.splice(' + i + ',1);if(!S.form.productos.length)S.form.productos.push({nombre:\'\',dosis:\'\',unidad:\'lt/ha\'});borrador();render()">✕</button></div>';
   });
-  if (f.productos.length < 6) h += '<button type="button" class="mas-btn" onclick="S.form.productos.push({nombre:\'\',dosis:\'\',unidad:\'lt/ha\'});borrador();render()">+ Agregar producto</button>';
+  if (!f.sinProductos && f.productos.length < 6) h += '<button type="button" class="mas-btn" onclick="S.form.productos.push({nombre:\'\',dosis:\'\',unidad:\'lt/ha\'});borrador();render()">+ Agregar producto</button>';
   h += '</section><section class="sec-card"><h2>Evidencia</h2>' + tile('cuartel', 'Pantallazo del cuartel (mapa)', 'Desde el control del Agras');
   h += '<div class="switch"><span>¿Hiciste análisis de papel hidrosensible?</span><button type="button" aria-label="Análisis hidrosensible" class="' + (f.analisis?'on':'') + '" onclick="setF(\'analisis\', !S.form.analisis);render()"></button></div>';
   if (f.analisis) h += tile('analisis', 'Pantallazo del análisis', 'Leo las cifras automáticamente') + '<p class="sub">Si quieres, escribe las cifras (si las dejas vacías, se leen del pantallazo):</p><div class="g2">' + campo('impactos','Impactos (gotas/cm²)',{num:1}) + campo('dv05','DV0.5 (µm)',{num:1}) + campo('dv01','DV0.1 (µm)',{num:1}) + campo('dv09','DV0.9 (µm)',{num:1}) + '</div>';
   h += '</section><section class="sec-card"><label class="f"><span>Observaciones</span><textarea oninput="setF(\'obs\', this.value)">' + esc(f.obs) + '</textarea></label><button type="button" class="btn sec" onclick="if(confirm(\'¿Borrar este informe y empezar de nuevo?\')){S.form=null;localStorage.removeItem(\'ranco_borrador\');ir(\'hoy\')}">Descartar informe</button></section>';
   h += '<div class="pie"><div class="in"><button class="btn full" ' + (S.enviando?'disabled':'') + ' onclick="enviarInforme()">' + (S.enviando ? 'Enviando…' : 'Guardar y generar PDF') + '</button><p>Si no hay señal, queda guardado en el teléfono y se envía solo al volver la cobertura</p></div></div>';
   return h;
+}
+function interruptor(k, texto, ayuda){
+  return '<div class="switch"><span>' + texto + (ayuda ? '<small style="display:block;font-weight:500;color:var(--muted);font-size:12px">' + ayuda + '</small>' : '') + '</span><button type="button" aria-label="' + esc(texto) + '" class="' + (S.form[k]?'on':'') + '" onclick="setF(\'' + k + '\', !S.form.' + k + ');render()"></button></div>';
 }
 function tile(k, label, ayuda){
   const img = S.form.imagenes[k];
@@ -675,12 +681,14 @@ function imagen(k, input){
 }
 function validar(f){
   const falta = [];
-  [['fecha','fecha'],['cliente','cliente'],['predio','predio'],['cultivo','cultivo'],['equipo','equipo'],['piloto','piloto'],['superficie','superficie'],['mojamiento','mojamiento'],['inicio','hora de inicio'],['termino','hora de término']].forEach(function(x){ if (!String(f[x[0]]||'').trim()) falta.push(x[1]); });
-  if (!f.productos.some(function(p){ return String(p.nombre).trim(); })) falta.push('al menos un producto');
+  const req = [['fecha','fecha'],['cliente','cliente'],['predio','predio'],['cultivo','cultivo'],['equipo','equipo'],['piloto','piloto'],['superficie','superficie'],['mojamiento','mojamiento']];
+  if (!f.sinHora) req.push(['inicio','hora de inicio'], ['termino','hora de término']);
+  req.forEach(function(x){ if (!String(f[x[0]]||'').trim()) falta.push(x[1]); });
+  if (!f.sinProductos && !f.mezclaCliente && !f.productos.some(function(p){ return String(p.nombre).trim(); })) falta.push('al menos un producto (o marca «Sin registro de productos»)');
   if (falta.length) return 'Falta completar: ' + falta.join(', ') + '.';
   const malos = [];
   ['superficie','mojamiento'].forEach(function(k){ if (isNaN(num(f[k])) || num(f[k]) < 0) malos.push(k); });
-  f.productos.forEach(function(p, i){ if (String(p.nombre).trim() && (isNaN(num(p.dosis)) || num(p.dosis) < 0)) malos.push('dosis del producto ' + (i+1)); });
+  if (!f.sinProductos) f.productos.forEach(function(p, i){ if (!String(p.nombre).trim()) return; if (f.mezclaCliente && !String(p.dosis).trim()) return; if (isNaN(num(p.dosis)) || num(p.dosis) < 0) malos.push('dosis del producto ' + (i+1)); });
   if (malos.length) return 'Revisa estos números: ' + malos.join(', ') + '.';
   return '';
 }
@@ -689,7 +697,10 @@ async function enviarInforme(){
   if (err) { S.error = err; render(); window.scrollTo(0,0); return; }
   const p = JSON.parse(JSON.stringify(f));
   if (String(f.piloto||'').trim()) localStorage.setItem('ranco_piloto', String(f.piloto).trim());
-  p.productos = p.productos.filter(function(x){ return String(x.nombre).trim(); });
+  p.productos = p.sinProductos ? [] : p.productos.filter(function(x){ return String(x.nombre).trim(); });
+  if (p.sinHora) { p.inicio = ''; p.termino = ''; }
+  const notas = [p.mezclaCliente ? 'Mezcla preparada por el cliente.' : '', p.sinProductos ? 'Sin registro de productos.' : '', p.sinHora ? 'Sin hora registrada.' : ''].filter(Boolean);
+  if (notas.length) p.obs = notas.join(' ') + (String(p.obs||'').trim() ? ' ' + String(p.obs).trim() : '');
   ['vuelos','minutos','temp','viento'].forEach(function(k){ delete p[k]; });
   p.cuarteles = [];
   if (p.imagenes) delete p.imagenes.foto;
